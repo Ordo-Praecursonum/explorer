@@ -20,6 +20,7 @@ const Transactions = lazy(() => import('@/pages/Transactions'))
 const Proposals = lazy(() => import('@/pages/Proposals'))
 const Accounts = lazy(() => import('@/pages/Accounts'))
 const Parameters = lazy(() => import('@/pages/Parameters'))
+const VerifyOrigin = lazy(() => import('@/pages/VerifyOrigin'))
 const BlockDetail = lazy(() => import('@/pages/BlockDetail'))
 const TransactionDetail = lazy(() => import('@/pages/TransactionDetail'))
 const AccountDetail = lazy(() => import('@/pages/AccountDetail'))
@@ -59,6 +60,7 @@ function AppContent() {
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/accounts/:address" element={<AccountDetail />} />
             <Route path="/parameters" element={<Parameters />} />
+            <Route path="/verify" element={<VerifyOrigin />} />
             <Route path="/connect" element={<Connect />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
