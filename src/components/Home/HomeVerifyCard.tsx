@@ -79,14 +79,7 @@ const HomeVerifyCard: React.FC = () => {
   }
 
   return (
-    <div
-      className="sur-card rounded-2xl p-6 sm:p-7"
-      style={{
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.border.primary}`,
-        boxShadow: colors.shadow.sm,
-      }}
-    >
+    <div className="glass sur-card rounded-3xl p-7 sm:p-8">
       <div className="flex items-start gap-4">
         <img
           src="/sur-logo.png"

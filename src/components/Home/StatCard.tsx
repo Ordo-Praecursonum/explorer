@@ -31,20 +31,7 @@ const StatCard: React.FC<StatCardProps> = React.memo(
     const cardIconColor = iconColor || colors.primary
 
     return (
-      <div
-        className="group rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border.primary}`,
-          boxShadow: colors.shadow.sm,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = colors.shadow.lg
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = colors.shadow.sm
-        }}
-      >
+      <div className="glass sur-card group rounded-2xl p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-3">

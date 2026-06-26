@@ -63,14 +63,7 @@ const RecentTransactionsCard: React.FC = React.memo(() => {
   }, [blocks])
 
   return (
-    <div
-      className="sur-card rounded-xl p-6"
-      style={{
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.border.primary}`,
-        boxShadow: colors.shadow.sm,
-      }}
-    >
+    <div className="glass sur-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3
           className="text-xl font-bold tracking-tight"

@@ -36,14 +36,7 @@ const RecentBlocksCard: React.FC = React.memo(() => {
   }, [persistentBlocks])
 
   return (
-    <div
-      className="rounded-xl p-6 transition-all duration-300 hover:shadow-lg"
-      style={{
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.border.primary}`,
-        boxShadow: colors.shadow.sm,
-      }}
-    >
+    <div className="glass sur-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3
           className="text-xl font-bold tracking-tight"

@@ -67,11 +67,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const SidebarContent = () => (
     <div
-      className="flex grow flex-col gap-y-6 overflow-y-auto border-r px-6 py-6 transition-colors duration-200"
+      className="flex grow flex-col gap-y-6 overflow-y-auto border-r px-5 py-6 backdrop-blur-xl transition-colors duration-200"
       style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.border.primary,
-        boxShadow: colors.shadow.sm,
+        backgroundColor: colors.surface + 'b3',
+        borderColor: colors.border.primary + '80',
       }}
     >
       {/* Logo */}
