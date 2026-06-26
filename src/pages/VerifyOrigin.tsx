@@ -169,7 +169,7 @@ const VerifyOrigin: React.FC = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 py-8 animate-fade-up">
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <div

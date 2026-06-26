@@ -15,8 +15,10 @@ import {
   FiWifiOff,
   FiGithub,
 } from 'react-icons/fi'
+import { FaXTwitter } from 'react-icons/fa6'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
+import SurLogo from '@/components/SurLogo'
 
 const navigation = [
   { name: 'Home', href: '/', icon: FiHome },
@@ -31,9 +33,15 @@ const navigation = [
 
 const externalLinks = [
   {
-    name: 'Github',
-    href: 'https://github.com/arifintahu/dexplorer',
+    name: 'GitHub',
+    href: 'https://github.com/Ordo-Praecursonum',
     icon: FiGithub,
+    isExternal: true,
+  },
+  {
+    name: 'X (Twitter)',
+    href: 'https://x.com/SurProtocol',
+    icon: FaXTwitter,
     isExternal: true,
   },
 ]
@@ -67,22 +75,28 @@ const Sidebar: React.FC<SidebarProps> = ({
         boxShadow: colors.shadow.sm,
       }}
     >
-      {/* Logo with improved styling */}
+      {/* Logo */}
       <div className="flex h-16 shrink-0 items-center">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: colors.primary }}
-          >
-            <span className="text-white font-bold text-lg">D</span>
+        <Link to="/" className="flex items-center gap-3 group">
+          <SurLogo
+            size={36}
+            className="transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3"
+          />
+          <div className="flex flex-col leading-none">
+            <h1
+              className="text-lg font-bold tracking-tight"
+              style={{ color: colors.text.primary }}
+            >
+              Sur Scanner
+            </h1>
+            <span
+              className="text-[11px] font-medium tracking-wide"
+              style={{ color: colors.text.tertiary }}
+            >
+              Proof of human origin
+            </span>
           </div>
-          <h1
-            className="text-xl font-bold tracking-tight"
-            style={{ color: colors.text.primary }}
-          >
-            Dexplorer
-          </h1>
-        </div>
+        </Link>
       </div>
 
       {/* Connection Status with modern styling */}
