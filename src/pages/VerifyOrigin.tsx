@@ -19,6 +19,39 @@ interface AttestationMatch {
   nullifier: string
   commitment_root: string
   timestamp: string
+  origin?: string
+  citation?: string
+}
+
+// The honest claim each origin represents. Only human_keyboard asserts a human
+// actually typed the content; the rest are device-signed declarations.
+function originClaim(origin?: string): { label: string; human: boolean } {
+  switch (origin) {
+    case undefined:
+    case '':
+    case 'human_keyboard':
+      return { label: 'Typed by a human on the Sur Keyboard', human: true }
+    case 'device_authored':
+      return {
+        label: 'Authored on this device — typing not verified',
+        human: false,
+      }
+    case 'ai_generated':
+      return { label: 'Declared AI-generated', human: false }
+    case 'external_source':
+      return { label: 'Quoted from an external source', human: false }
+    case 'imported':
+      return { label: 'Imported / other origin', human: false }
+    case 'ai_agent':
+      return { label: 'Produced by an AI agent', human: false }
+    default:
+      return { label: `Origin: ${origin}`, human: false }
+  }
+}
+
+// The signer's identity is an AI agent (surai1…) or a device (surdev1…).
+function identityLabel(origin?: string): string {
+  return origin === 'ai_agent' ? 'Agent' : 'Device'
 }
 
 interface VerifyResponse {
@@ -27,16 +60,25 @@ interface VerifyResponse {
   attestations: AttestationMatch[]
 }
 
-type Mode = 'text' | 'hash'
+type Mode = 'text' | 'hash' | 'device'
 
 type Verdict =
   | { kind: 'idle' }
   | { kind: 'loading' }
   | { kind: 'verified'; hash: string; matches: AttestationMatch[] }
   | { kind: 'unverified'; hash: string }
+  // device-scoped checks
+  | {
+      kind: 'deviceMatch'
+      hash: string
+      deviceId: string
+      match: AttestationMatch
+    }
+  | { kind: 'deviceMismatch'; hash: string; deviceId: string; count: number }
   | { kind: 'error'; message: string }
 
 const HASH_RE = /^(0x)?[0-9a-fA-F]{64}$/
+const DEVICE_RE = /^surdev1[0-9a-z]{6,}$/
 
 async function sha256Hex(text: string): Promise<string> {
   const data = new TextEncoder().encode(text)
@@ -44,19 +86,6 @@ async function sha256Hex(text: string): Promise<string> {
   return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
-}
-
-function base64ToHex(b64: string): string {
-  try {
-    const bin = atob(b64)
-    let hex = ''
-    for (let i = 0; i < bin.length; i++) {
-      hex += bin.charCodeAt(i).toString(16).padStart(2, '0')
-    }
-    return hex
-  } catch {
-    return b64
-  }
 }
 
 function shorten(s: string, head = 10, tail = 6): string {
@@ -74,11 +103,14 @@ const VerifyOrigin: React.FC = () => {
   const { colors } = useTheme()
   const [mode, setMode] = useState<Mode>('text')
   const [input, setInput] = useState('')
+  const [deviceId, setDeviceId] = useState('')
   const [verdict, setVerdict] = useState<Verdict>({ kind: 'idle' })
 
   const canSubmit =
     input.trim().length > 0 &&
-    (mode === 'text' || HASH_RE.test(input.trim())) &&
+    (mode === 'text' ||
+      (mode === 'hash' && HASH_RE.test(input.trim())) ||
+      (mode === 'device' && DEVICE_RE.test(deviceId.trim().toLowerCase()))) &&
     verdict.kind !== 'loading'
 
   const handleVerify = async () => {
@@ -98,8 +130,33 @@ const VerifyOrigin: React.FC = () => {
         )
       }
       const data: VerifyResponse = await res.json()
-      if (data.found && data.attestations?.length) {
-        setVerdict({ kind: 'verified', hash, matches: data.attestations })
+      const matches = data.found ? (data.attestations ?? []) : []
+
+      if (mode === 'device') {
+        const wanted = deviceId.trim().toLowerCase()
+        const hit = matches.find((m) => m.username.toLowerCase() === wanted)
+        if (hit) {
+          setVerdict({
+            kind: 'deviceMatch',
+            hash,
+            deviceId: wanted,
+            match: hit,
+          })
+        } else if (matches.length > 0) {
+          setVerdict({
+            kind: 'deviceMismatch',
+            hash,
+            deviceId: wanted,
+            count: matches.length,
+          })
+        } else {
+          setVerdict({ kind: 'unverified', hash })
+        }
+        return
+      }
+
+      if (matches.length > 0) {
+        setVerdict({ kind: 'verified', hash, matches })
       } else {
         setVerdict({ kind: 'unverified', hash })
       }
@@ -149,7 +206,7 @@ const VerifyOrigin: React.FC = () => {
       >
         {/* Mode toggle */}
         <div className="flex gap-2 mb-4">
-          {(['text', 'hash'] as Mode[]).map((m) => (
+          {(['text', 'hash', 'device'] as Mode[]).map((m) => (
             <button
               key={m}
               onClick={() => {
@@ -163,12 +220,28 @@ const VerifyOrigin: React.FC = () => {
                 color: mode === m ? colors.text.inverse : colors.text.secondary,
               }}
             >
-              {m === 'text' ? 'Paste text' : 'Paste hash'}
+              {m === 'text'
+                ? 'Paste text'
+                : m === 'hash'
+                  ? 'Paste hash'
+                  : 'Text + device'}
             </button>
           ))}
         </div>
 
-        {mode === 'text' ? (
+        {mode === 'hash' ? (
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="0x… (64 hex chars — SHA-256 of the content)"
+            className="w-full rounded-lg p-3 text-sm font-mono outline-none"
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text.primary,
+              border: `1px solid ${colors.border.secondary}`,
+            }}
+          />
+        ) : (
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -181,12 +254,15 @@ const VerifyOrigin: React.FC = () => {
               border: `1px solid ${colors.border.secondary}`,
             }}
           />
-        ) : (
+        )}
+
+        {/* Device id field — only in "Text + device" mode */}
+        {mode === 'device' && (
           <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="0x… (64 hex chars — SHA-256 of the content)"
-            className="w-full rounded-lg p-3 text-sm font-mono outline-none"
+            value={deviceId}
+            onChange={(e) => setDeviceId(e.target.value)}
+            placeholder="surdev1… (the device id to check)"
+            className="w-full rounded-lg p-3 mt-3 text-sm font-mono outline-none"
             style={{
               backgroundColor: colors.background,
               color: colors.text.primary,
@@ -197,11 +273,16 @@ const VerifyOrigin: React.FC = () => {
 
         <div className="flex items-center justify-between mt-4">
           <span className="text-xs" style={{ color: colors.text.tertiary }}>
-            {mode === 'text'
-              ? `${input.length} characters`
-              : HASH_RE.test(input.trim()) || input.length === 0
+            {mode === 'hash'
+              ? HASH_RE.test(input.trim()) || input.length === 0
                 ? 'SHA-256 hex'
-                : 'Expected 64 hex characters'}
+                : 'Expected 64 hex characters'
+              : mode === 'device'
+                ? deviceId.length === 0 ||
+                  DEVICE_RE.test(deviceId.trim().toLowerCase())
+                  ? `${input.length} characters`
+                  : 'Enter a valid surdev1… device id'
+                : `${input.length} characters`}
           </span>
           <button
             onClick={handleVerify}
@@ -223,47 +304,166 @@ const VerifyOrigin: React.FC = () => {
       </div>
 
       {/* Result */}
-      {verdict.kind === 'verified' && (
-        <ResultCard
-          color={colors.status.success}
-          icon={<FiCheckCircle className="w-6 h-6" />}
-          title="Human-typed on Sur Keyboard"
-          subtitle="A zero-knowledge proof on the Sur Chain confirms this exact text was typed by a human (typing dynamics passed the human-likeness threshold) on a registered device."
-          colors={colors}
-        >
-          <HashRow label="Content hash" value={verdict.hash} colors={colors} />
-          <div className="mt-3 space-y-3">
-            {verdict.matches.map((m, i) => (
+      {verdict.kind === 'verified' &&
+        (() => {
+          const allHuman = verdict.matches.every(
+            (m) => originClaim(m.origin).human
+          )
+          return (
+            <ResultCard
+              color={allHuman ? colors.status.success : colors.status.info}
+              icon={<FiCheckCircle className="w-6 h-6" />}
+              title={
+                allHuman
+                  ? 'Human-typed on Sur Keyboard'
+                  : 'Recorded on the Sur Chain'
+              }
+              subtitle={
+                allHuman
+                  ? 'A zero-knowledge proof confirms this exact text was typed by a human (typing dynamics passed the human-likeness threshold) on a registered Sur device.'
+                  : 'This content is recorded on the Sur Chain, but NOT as human-typed. Each entry below shows what the device actually claims — a declaration is signed by the device, but does not certify a human typed it.'
+              }
+              colors={colors}
+            >
+              <HashRow
+                label="Content hash"
+                value={verdict.hash}
+                colors={colors}
+              />
+              <div className="mt-3 space-y-3">
+                {verdict.matches.map((m, i) => {
+                  const claim = originClaim(m.origin)
+                  return (
+                    <div
+                      key={i}
+                      className="rounded-lg p-3"
+                      style={{
+                        backgroundColor: colors.background,
+                        border: `1px solid ${claim.human ? colors.status.success : colors.border.primary}`,
+                      }}
+                    >
+                      <Field
+                        icon={
+                          claim.human ? (
+                            <FiCheckCircle className="w-4 h-4" />
+                          ) : (
+                            <FiHelpCircle className="w-4 h-4" />
+                          )
+                        }
+                        label="Claim"
+                        value={claim.label}
+                        colors={colors}
+                      />
+                      {m.citation && (
+                        <Field
+                          icon={<FiHash className="w-4 h-4" />}
+                          label="Source"
+                          value={m.citation}
+                          colors={colors}
+                        />
+                      )}
+                      <Field
+                        icon={<FiUser className="w-4 h-4" />}
+                        label={identityLabel(m.origin)}
+                        value={shorten(m.username, 14, 8)}
+                        mono
+                        colors={colors}
+                      />
+                      <Field
+                        icon={<FiClock className="w-4 h-4" />}
+                        label="Attested"
+                        value={formatTimestamp(m.timestamp)}
+                        colors={colors}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            </ResultCard>
+          )
+        })()}
+
+      {verdict.kind === 'deviceMatch' &&
+        (() => {
+          const claim = originClaim(verdict.match.origin)
+          return (
+            <ResultCard
+              color={claim.human ? colors.status.success : colors.status.info}
+              icon={<FiCheckCircle className="w-6 h-6" />}
+              title={
+                claim.human ? 'Typed by this device' : 'Attested by this device'
+              }
+              subtitle={
+                claim.human
+                  ? 'This exact text was typed by a human on the specified Sur device — confirmed by a zero-knowledge proof on the Sur Chain.'
+                  : 'The specified device attested this content on the Sur Chain — see its claim below. This is a device-signed declaration, not a proof that a human typed it.'
+              }
+              colors={colors}
+            >
+              <HashRow
+                label="Content hash"
+                value={verdict.hash}
+                colors={colors}
+              />
               <div
-                key={i}
-                className="rounded-lg p-3"
+                className="rounded-lg p-3 mt-3"
                 style={{
                   backgroundColor: colors.background,
                   border: `1px solid ${colors.border.primary}`,
                 }}
               >
                 <Field
+                  icon={
+                    claim.human ? (
+                      <FiCheckCircle className="w-4 h-4" />
+                    ) : (
+                      <FiHelpCircle className="w-4 h-4" />
+                    )
+                  }
+                  label="Claim"
+                  value={claim.label}
+                  colors={colors}
+                />
+                {verdict.match.citation && (
+                  <Field
+                    icon={<FiHash className="w-4 h-4" />}
+                    label="Source"
+                    value={verdict.match.citation}
+                    colors={colors}
+                  />
+                )}
+                <Field
                   icon={<FiUser className="w-4 h-4" />}
-                  label="Typed by"
-                  value={`@${m.username}`}
+                  label={identityLabel(verdict.match.origin)}
+                  value={verdict.deviceId}
+                  mono
                   colors={colors}
                 />
                 <Field
                   icon={<FiClock className="w-4 h-4" />}
                   label="Attested"
-                  value={formatTimestamp(m.timestamp)}
-                  colors={colors}
-                />
-                <Field
-                  icon={<FiHash className="w-4 h-4" />}
-                  label="Nullifier"
-                  value={shorten(base64ToHex(m.nullifier))}
-                  mono
+                  value={formatTimestamp(verdict.match.timestamp)}
                   colors={colors}
                 />
               </div>
-            ))}
-          </div>
+            </ResultCard>
+          )
+        })()}
+
+      {verdict.kind === 'deviceMismatch' && (
+        <ResultCard
+          color={colors.status.warning}
+          icon={<FiHelpCircle className="w-6 h-6" />}
+          title="Not from this device"
+          subtitle={`This content is attested on the Sur Chain by ${verdict.count} device${verdict.count === 1 ? '' : 's'}, but none of them is the device id you entered. The content is human-typed — just not by that device.`}
+          colors={colors}
+        >
+          <HashRow label="Content hash" value={verdict.hash} colors={colors} />
+          <HashRow
+            label="Checked device"
+            value={verdict.deviceId}
+            colors={colors}
+          />
         </ResultCard>
       )}
 
