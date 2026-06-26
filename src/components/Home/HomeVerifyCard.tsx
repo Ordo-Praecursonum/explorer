@@ -8,7 +8,6 @@ import {
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import { config } from '@/config'
-import SurLogo from '@/components/SurLogo'
 
 interface Match {
   username: string
@@ -39,7 +38,7 @@ function claimText(origin?: string): string {
 type Result =
   | { kind: 'idle' }
   | { kind: 'loading' }
-  | { kind: 'found'; match: Match; count: number }
+  | { kind: 'found'; match: Match }
   | { kind: 'notfound' }
   | { kind: 'error' }
 
@@ -69,11 +68,11 @@ const HomeVerifyCard: React.FC = () => {
       if (!res.ok) throw new Error()
       const data = await res.json()
       const matches: Match[] = data.found ? (data.attestations ?? []) : []
-      if (matches.length > 0) {
-        setResult({ kind: 'found', match: matches[0], count: matches.length })
-      } else {
-        setResult({ kind: 'notfound' })
-      }
+      setResult(
+        matches.length > 0
+          ? { kind: 'found', match: matches[0] }
+          : { kind: 'notfound' }
+      )
     } catch {
       setResult({ kind: 'error' })
     }
@@ -81,88 +80,121 @@ const HomeVerifyCard: React.FC = () => {
 
   return (
     <div
-      className="sur-card relative overflow-hidden rounded-2xl p-6 sm:p-8"
+      className="sur-card rounded-2xl p-6 sm:p-7"
       style={{
-        background:
-          'linear-gradient(135deg, #D9461E 0%, #F26419 55%, #FF9E40 100%)',
-        boxShadow: colors.shadow.lg,
+        backgroundColor: colors.surface,
+        border: `1px solid ${colors.border.primary}`,
+        boxShadow: colors.shadow.sm,
       }}
     >
-      {/* soft decorative glow */}
-      <div
-        className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-20 animate-float"
-        style={{
-          background: 'radial-gradient(circle, #fff 0%, transparent 70%)',
-        }}
-      />
-
-      <div className="relative flex items-center gap-3 mb-4">
-        <SurLogo size={28} idSuffix="-home" />
-        <span className="text-white/90 text-sm font-semibold tracking-wide uppercase">
-          Verify content origin
-        </span>
-      </div>
-
-      <h2 className="relative text-white text-2xl sm:text-3xl font-bold tracking-tight mb-2">
-        Was it written by a human?
-      </h2>
-      <p className="relative text-white/85 text-sm mb-5 max-w-xl">
-        Paste any text — it's hashed in your browser and checked against
-        on-chain proofs of human typing. Only the hash leaves your device.
-      </p>
-
-      <div className="relative flex flex-col sm:flex-row gap-2">
-        <div className="flex-1 flex items-center gap-2 rounded-xl bg-white/15 backdrop-blur px-3 py-2 ring-1 ring-white/20 focus-within:ring-white/50 transition">
-          <FiSearch className="text-white/80 shrink-0" />
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && verify()}
-            placeholder="Paste text to verify…"
-            className="w-full bg-transparent text-white placeholder-white/60 outline-none text-sm"
-          />
-        </div>
-        <button
-          onClick={verify}
-          disabled={result.kind === 'loading' || !text.trim()}
-          className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-orange-700 hover:bg-white/90 active:scale-95 transition disabled:opacity-60"
-        >
-          {result.kind === 'loading' ? 'Checking…' : 'Verify'}
-        </button>
-      </div>
-
-      {/* compact result */}
-      {result.kind === 'found' && (
-        <div className="relative mt-4 flex items-center gap-2 rounded-xl bg-white/15 px-4 py-3 text-white animate-fade-up">
-          <FiCheckCircle className="shrink-0" />
-          <span className="text-sm font-medium">
-            {claimText(result.match.origin)}
+      <div className="flex items-start gap-4">
+        <img
+          src="/sur-logo.png"
+          alt=""
+          width={40}
+          height={40}
+          className="rounded-[11px] shrink-0 hidden sm:block"
+        />
+        <div className="min-w-0 flex-1">
+          <span
+            className="text-xs font-semibold tracking-wide uppercase"
+            style={{ color: colors.primary }}
+          >
+            Verify content origin
           </span>
-        </div>
-      )}
-      {result.kind === 'notfound' && (
-        <div className="relative mt-4 flex items-center gap-2 rounded-xl bg-black/15 px-4 py-3 text-white animate-fade-up">
-          <FiHelpCircle className="shrink-0" />
-          <span className="text-sm font-medium">
-            No attestation found — origin unverified.
-          </span>
-        </div>
-      )}
-      {result.kind === 'error' && (
-        <div className="relative mt-4 text-white/90 text-sm animate-fade-up">
-          Couldn't reach the chain. Is the node connected?
-        </div>
-      )}
+          <h2
+            className="text-xl sm:text-2xl font-semibold tracking-tight mt-1"
+            style={{ color: colors.text.primary }}
+          >
+            Was it written by a human?
+          </h2>
+          <p
+            className="text-sm mt-1.5 max-w-xl"
+            style={{ color: colors.text.secondary }}
+          >
+            Paste any text — it's hashed in your browser and checked against
+            on-chain proofs of human typing. Only the hash leaves your device.
+          </p>
 
-      <Link
-        to="/verify"
-        className="relative mt-4 inline-flex items-center gap-1.5 text-white/90 hover:text-white text-sm font-medium group"
-      >
-        Open the full verifier
-        <FiArrowRight className="transition-transform group-hover:translate-x-0.5" />
-      </Link>
+          <div className="mt-4 flex flex-col sm:flex-row gap-2">
+            <div
+              className="flex-1 flex items-center gap-2 rounded-xl px-3 py-2.5 transition-all"
+              style={{
+                backgroundColor: colors.background,
+                border: `1px solid ${colors.border.secondary}`,
+              }}
+            >
+              <FiSearch
+                className="shrink-0"
+                style={{ color: colors.text.tertiary }}
+              />
+              <input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && verify()}
+                placeholder="Paste text to verify…"
+                className="w-full bg-transparent outline-none text-sm"
+                style={{ color: colors.text.primary }}
+              />
+            </div>
+            <button
+              onClick={verify}
+              disabled={result.kind === 'loading' || !text.trim()}
+              className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition active:scale-95 disabled:opacity-50"
+              style={{ backgroundColor: colors.primary }}
+            >
+              {result.kind === 'loading' ? 'Checking…' : 'Verify'}
+            </button>
+          </div>
+
+          {result.kind === 'found' && (
+            <ResultPill
+              icon={<FiCheckCircle />}
+              text={claimText(result.match.origin)}
+              color={colors.status.success}
+            />
+          )}
+          {result.kind === 'notfound' && (
+            <ResultPill
+              icon={<FiHelpCircle />}
+              text="No attestation found — origin unverified."
+              color={colors.status.warning}
+            />
+          )}
+          {result.kind === 'error' && (
+            <ResultPill
+              icon={<FiHelpCircle />}
+              text="Couldn't reach the chain. Is the node connected?"
+              color={colors.text.tertiary}
+            />
+          )}
+
+          <Link
+            to="/verify"
+            className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium group"
+            style={{ color: colors.primary }}
+          >
+            Open the full verifier
+            <FiArrowRight className="transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }
+
+const ResultPill: React.FC<{
+  icon: React.ReactNode
+  text: string
+  color: string
+}> = ({ icon, text, color }) => (
+  <div
+    className="mt-3 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium animate-fade-up"
+    style={{ backgroundColor: color + '14', color }}
+  >
+    <span className="shrink-0">{icon}</span>
+    {text}
+  </div>
+)
 
 export default HomeVerifyCard

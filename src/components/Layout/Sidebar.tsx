@@ -18,7 +18,6 @@ import {
 import { FaXTwitter } from 'react-icons/fa6'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
-import SurLogo from '@/components/SurLogo'
 
 const navigation = [
   { name: 'Home', href: '/', icon: FiHome },
@@ -77,20 +76,23 @@ const Sidebar: React.FC<SidebarProps> = ({
     >
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center">
-        <Link to="/" className="flex items-center gap-3 group">
-          <SurLogo
-            size={36}
-            className="transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3"
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img
+            src="/sur-logo.png"
+            alt="Sur"
+            width={32}
+            height={32}
+            className="rounded-[9px] transition-transform duration-300 group-hover:scale-105"
           />
-          <div className="flex flex-col leading-none">
+          <div className="flex flex-col leading-tight">
             <h1
-              className="text-lg font-bold tracking-tight"
+              className="text-[17px] font-semibold tracking-tight"
               style={{ color: colors.text.primary }}
             >
               Sur Scanner
             </h1>
             <span
-              className="text-[11px] font-medium tracking-wide"
+              className="text-[10.5px] font-medium tracking-wide"
               style={{ color: colors.text.tertiary }}
             >
               Proof of human origin
