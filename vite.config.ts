@@ -42,6 +42,9 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    preview: {
+      allowedHosts: ['explorer.surprotocol.org'],
+    },
     test: {
       globals: true,
       environment: 'jsdom',
