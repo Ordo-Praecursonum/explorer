@@ -4,7 +4,9 @@ import { FiBox, FiUsers, FiClock, FiActivity } from 'react-icons/fi'
 import { useHomeData } from '@/hooks/useHomeData'
 import StatCard from '@/components/Home/StatCard'
 import RecentBlocksCard from '@/components/Home/RecentBlocksCard'
+import RecentTransactionsCard from '@/components/Home/RecentTransactionsCard'
 import QuickActionsCard from '@/components/Home/QuickActionsCard'
+import HomeVerifyCard from '@/components/Home/HomeVerifyCard'
 
 const Home: React.FC = () => {
   const { colors } = useTheme()
@@ -18,22 +20,30 @@ const Home: React.FC = () => {
   } = useHomeData()
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="mb-8">
+    <div className="space-y-10">
+      {/* Hero */}
+      <div className="animate-fade-up">
         <h1
-          className="text-3xl font-bold tracking-tight mb-2"
+          className="text-3xl sm:text-4xl font-bold tracking-tight mb-1"
           style={{ color: colors.text.primary }}
         >
-          Dexplorer Dashboard
+          Sur Scanner
         </h1>
-        <p className="text-lg" style={{ color: colors.text.secondary }}>
-          Real-time insights into the blockchain network
+        <p
+          className="text-base sm:text-lg"
+          style={{ color: colors.text.secondary }}
+        >
+          Explore the Sur Chain and verify the human origin of content.
         </p>
       </div>
 
+      {/* Verify origin — front and centre */}
+      <div className="animate-fade-up-1">
+        <HomeVerifyCard />
+      </div>
+
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-up-2">
         <StatCard
           title="Latest Block"
           value={
@@ -60,26 +70,26 @@ const Home: React.FC = () => {
           value={isConnected ? totalTransactions : 'Not Connected'}
           icon={FiActivity}
           subtitle="Transaction count"
-          iconColor={colors.status.warning}
+          iconColor={colors.primary}
         />
         <StatCard
           title="Block Time"
           value={isConnected ? blockTime : 'Not Connected'}
           icon={FiClock}
           subtitle="Latest interval"
-          iconColor={colors.status.error}
+          iconColor={colors.status.warning}
         />
       </div>
 
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2">
-          <RecentBlocksCard />
-        </div>
+      {/* Recent activity */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 animate-fade-up-3">
+        <RecentBlocksCard />
+        <RecentTransactionsCard />
+      </div>
 
-        <div className="h-full">
-          <QuickActionsCard isConnected={isConnected} />
-        </div>
+      {/* Quick actions */}
+      <div className="animate-fade-up-3">
+        <QuickActionsCard isConnected={isConnected} />
       </div>
     </div>
   )

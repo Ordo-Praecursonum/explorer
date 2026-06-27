@@ -29,14 +29,7 @@ const QuickActionsCard: React.FC<QuickActionsCardProps> = ({ isConnected }) => {
   ]
 
   return (
-    <div
-      className="rounded-xl p-6 transition-all duration-300 hover:shadow-lg h-full flex flex-col"
-      style={{
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.border.primary}`,
-        boxShadow: colors.shadow.sm,
-      }}
-    >
+    <div className="glass sur-card rounded-2xl p-6 h-full flex flex-col">
       <div className="mb-8">
         <h3
           className="text-lg font-bold mb-4 tracking-tight"

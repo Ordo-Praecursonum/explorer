@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useTheme } from '@/theme/ThemeProvider'
 import Sidebar from './Sidebar'
 import TopNavigation from './TopNavigation'
 
@@ -8,7 +7,6 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { colors } = useTheme()
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   const toggleMobileSidebar = () => {
@@ -20,10 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   return (
-    <div
-      className="min-h-screen flex"
-      style={{ backgroundColor: colors.background }}
-    >
+    <div className="app-bg min-h-screen flex">
       <Sidebar
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={closeMobileSidebar}
@@ -35,7 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <TopNavigation onMenuClick={toggleMobileSidebar} />
 
         {/* Page Content */}
-        <div className="p-4 lg:p-6">
+        <div className="p-5 lg:p-8">
           <div className="max-w-7xl mx-auto">{children}</div>
         </div>
       </main>

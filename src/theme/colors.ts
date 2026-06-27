@@ -2,8 +2,8 @@
 export const colors = {
   // Light mode colors
   light: {
-    primary: '#0284c7', // Sky-600
-    primaryHover: '#0369a1', // Sky-700
+    primary: '#ea580c', // Sur orange (Orange-600)
+    primaryHover: '#c2410c', // Orange-700
     background: '#f8fafc', // Slate-50
     backgroundSecondary: '#f1f5f9', // Slate-100
     backgroundTertiary: '#e2e8f0', // Slate-200
@@ -18,7 +18,7 @@ export const colors = {
     border: {
       primary: '#e2e8f0', // Slate-200
       secondary: '#cbd5e1', // Slate-300
-      focus: '#0ea5e9', // Sky-500
+      focus: '#f97316', // Orange-500
     },
     status: {
       success: '#10b981', // Emerald-500
@@ -34,8 +34,8 @@ export const colors = {
   },
   // Dark mode colors
   dark: {
-    primary: '#38bdf8', // Sky-400
-    primaryHover: '#0ea5e9', // Sky-500
+    primary: '#fb923c', // Sur orange (Orange-400)
+    primaryHover: '#f97316', // Orange-500
     background: '#0f172a', // Slate-900
     backgroundSecondary: '#1e293b', // Slate-800
     backgroundTertiary: '#334155', // Slate-700
@@ -50,7 +50,7 @@ export const colors = {
     border: {
       primary: '#334155', // Slate-700
       secondary: '#475569', // Slate-600
-      focus: '#38bdf8', // Sky-400
+      focus: '#fb923c', // Orange-400
     },
     status: {
       success: '#34d399', // Emerald-400

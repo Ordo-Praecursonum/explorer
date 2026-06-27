@@ -15,6 +15,7 @@ import {
   FiWifiOff,
   FiGithub,
 } from 'react-icons/fi'
+import { FaXTwitter } from 'react-icons/fa6'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
 
@@ -31,9 +32,15 @@ const navigation = [
 
 const externalLinks = [
   {
-    name: 'Github',
-    href: 'https://github.com/arifintahu/dexplorer',
+    name: 'GitHub',
+    href: 'https://github.com/Ordo-Praecursonum',
     icon: FiGithub,
+    isExternal: true,
+  },
+  {
+    name: 'X (Twitter)',
+    href: 'https://x.com/SurProtocol',
+    icon: FaXTwitter,
     isExternal: true,
   },
 ]
@@ -60,29 +67,37 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const SidebarContent = () => (
     <div
-      className="flex grow flex-col gap-y-6 overflow-y-auto border-r px-6 py-6 transition-colors duration-200"
+      className="flex grow flex-col gap-y-6 overflow-y-auto border-r px-5 py-6 backdrop-blur-xl transition-colors duration-200"
       style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.border.primary,
-        boxShadow: colors.shadow.sm,
+        backgroundColor: colors.surface + 'b3',
+        borderColor: colors.border.primary + '80',
       }}
     >
-      {/* Logo with improved styling */}
+      {/* Logo */}
       <div className="flex h-16 shrink-0 items-center">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: colors.primary }}
-          >
-            <span className="text-white font-bold text-lg">D</span>
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img
+            src="/sur-logo.png"
+            alt="Sur"
+            width={32}
+            height={32}
+            className="rounded-[9px] transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="flex flex-col leading-tight">
+            <h1
+              className="text-[17px] font-semibold tracking-tight"
+              style={{ color: colors.text.primary }}
+            >
+              Sur Scanner
+            </h1>
+            <span
+              className="text-[10.5px] font-medium tracking-wide"
+              style={{ color: colors.text.tertiary }}
+            >
+              Proof of human origin
+            </span>
           </div>
-          <h1
-            className="text-xl font-bold tracking-tight"
-            style={{ color: colors.text.primary }}
-          >
-            Dexplorer
-          </h1>
-        </div>
+        </Link>
       </div>
 
       {/* Connection Status with modern styling */}

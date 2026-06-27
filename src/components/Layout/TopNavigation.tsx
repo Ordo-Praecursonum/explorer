@@ -270,10 +270,10 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   return (
     <>
       <header
-        className="sticky top-0 z-30 border-b backdrop-blur-sm bg-opacity-80"
+        className="sticky top-0 z-30 border-b backdrop-blur-xl"
         style={{
-          backgroundColor: `${colors.surface}cc`,
-          borderColor: colors.border.primary,
+          backgroundColor: `${colors.surface}99`,
+          borderColor: `${colors.border.primary}80`,
         }}
       >
         <div className="flex items-center justify-between px-4 lg:px-6 py-4">
