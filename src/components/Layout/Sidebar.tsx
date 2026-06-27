@@ -10,6 +10,7 @@ import {
   FiActivity,
   FiSettings,
   FiUser,
+  FiShield,
   FiWifi,
   FiWifiOff,
   FiGithub,
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Validators', href: '/validators', icon: FiUsers },
   { name: 'Proposals', href: '/proposals', icon: FiFileText },
   { name: 'Accounts', href: '/accounts', icon: FiUser },
+  { name: 'Verify Origin', href: '/verify', icon: FiShield },
   { name: 'Parameters', href: '/parameters', icon: FiSettings },
 ]
 
